@@ -16,30 +16,46 @@ import settings
 from helpers import get_logger
 from server.motor import Motor
 
-__version__ = '0.0.1'
+__version__ = '0.0.3'
 
 print 'server version:', __version__
 
-# кнопка вниз
-JOYBUTTONDOWN = 10
-# кнопка вверх
-JOYBUTTONUP = 11
-# 3х мерный джой
-JOYAXISMOTION = 7
-# стрелка
-JOYHATMOTION = 9
+JOY_B0 = 0
+JOY_B1 = 1
+JOY_B2 = 2
+JOY_B3 = 3
+JOY_B4 = 4
+JOY_B5 = 5
+JOY_B6 = 6
+JOY_B7 = 7
+JOY_B8 = 8
+JOY_B9 = 9
 
-# левый вверх вниз
-AXIS_L_Y = 1
-# левый влево вправо
-AXIS_L_X = 0
-# левый по высоте
-AXIS_L_Z = 2
+JOY_L_LR = 10
+JOY_L_UD = 11
+JOY_LRT = 12
+JOY_R_UD = 13
+JOY_R_LR = 14
 
-# аналогично правый
-AXIS_R_Y = 4
-AXIS_R_X = 3
-AXIS_R_Z = 5
+JOYS = (
+    JOY_B0,
+    JOY_B1,
+    JOY_B2,
+    JOY_B3,
+    JOY_B4,
+    JOY_B5,
+    JOY_B6,
+    JOY_B7,
+    JOY_B8,
+    JOY_B9,
+    JOY_L_LR,
+    JOY_L_UD,
+    JOY_LRT,
+    JOY_R_UD,
+    JOY_R_LR,
+)
+JOY_COUNT_STATES = len(JOYS)
+
 
 class Application(object):
 
@@ -59,13 +75,6 @@ class Application(object):
         self.is_running = False
         self.last_handle_request_time = 0
 
-        self.event_handlers = {
-            JOYAXISMOTION: self.handle_axis_motion,
-            JOYHATMOTION: self.handle_hat_motion,
-            JOYBUTTONDOWN: self.handle_button_down,
-            JOYBUTTONUP: self.handle_button_up,
-        }
-
     def motors_off(self):
         """
         выключаем все моторы
@@ -74,36 +83,19 @@ class Application(object):
         self.motor_left.off()
         self.motor_right.off()
 
-    def handle_axis_motion(self, event_type, axis, value):
+    def handle_axis_motion(self, values):
         """
         обработчик событий 3х мерного джоя
         """
-        print 'handle_axis_motion', event_type, axis, value
+        self.motor_left.process_value(
+            int(values[JOY_L_UD] * 255) + int(values[JOY_L_LR] * 255))
+        self.motor_right.process_value(
+            int(values[JOY_L_UD] * 255) - int(values[JOY_L_LR] * 255))
 
-        if axis == AXIS_L_Y:
-            # левый мотор вперед
-            self.motor_left.process_value(value)
-        elif axis == AXIS_R_Y:
-            # левый мотор вперед
-            self.motor_right.process_value(value)
-
-    def handle_hat_motion(self, event_type, hat, value_0, value_2):
+    def handle_buttons(self, values):
         """
-        обработчик крестика
+        обработчик состояния кнопок
         """
-        print 'handle_hat_motion', event_type, hat, value_0, value_2
-
-    def handle_button_down(self, event_type, button):
-        """
-        обработчик нажатия кнопки
-        """
-        print 'handle_button_down', event_type, button
-
-    def handle_button_up(self, event_type, button):
-        """
-        обработчик отпускания кнопки
-        """
-        print 'handle_button_up', event_type, button
 
     def handle_request(self, request, client_address, server):
         """
@@ -121,41 +113,13 @@ class Application(object):
             return
 
         try:
-            params = [float(i) if '.' in i else int(i) for i in _request.split(',')]
+            joy_state = [float(i) if '.' in i else int(i) for i in _request.split(',')]
         except (ValueError, TypeError):
             return
 
-        if params[0] in self.event_handlers:
-            self.event_handlers[params[0]](*params)
-
-        # # Separate the command into individual drives
-        # driveCommands = request.split(',')
-        #
-        # if len(driveCommands) == 1:
-        #     # Special commands
-        #     if request == 'ALLOFF':
-        #         # Turn all drives off
-        #         logger.debug('command ALLOFF')
-        #         all_motor_off()
-        #     elif request == 'EXIT':
-        #         logger.debug('command EXIT')
-        #         # Exit the program
-        #         IS_RUNNING = False
-        #     else:
-        #         logger.debug('Special command "%s" not recognised' % (request))
-        #         # Unknown command
-        #         print 'Special command "%s" not recognised' % (request)
-        #
-        # elif len(driveCommands) == 16:
-        #     # 16 - длинна принятого массива команд
-        #     motor_left.process_value(
-        #         int(driveCommands[0]) + int(driveCommands[1]))
-        #     motor_right.process_value(
-        #         int(driveCommands[0]) - int(driveCommands[1]))
-        # else:
-        #     logger.debug('Command "%s" did not have parts!' % (request))
-        #     # Did not get the right number of drive commands
-        #     print 'Command "%s" did not have parts!' % (request)
+        if len(joy_state) == JOY_COUNT_STATES:
+            self.handle_buttons(joy_state)
+            self.handle_axis_motion(joy_state)
 
     def start(self):
         """"""
@@ -192,6 +156,7 @@ class Application(object):
             self.logger.debug(err)
             import traceback
             self.logger.debug(traceback.format_exc())
+
 
 if __name__ == '__main__':
     Application().run()

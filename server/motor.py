@@ -84,8 +84,6 @@ class Motor:
         """
         обработка значения
         """
-        value = int(value) * 255
-
         if value > 255 :
             value = 255
         elif value < -255:
