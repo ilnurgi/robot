@@ -11,7 +11,7 @@ import pygame.joystick
 
 import settings
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 print 'gamepad proxy:', __version__
 
@@ -58,6 +58,8 @@ def run():
     joystick_num_axes = joystick.get_numaxes()
 
     print 'joystick found:', joystick.get_name()
+    print 'count buttons:', joystick_num_buttons
+    print 'count axes:', joystick_num_axes
 
     # кнопки
     JOY_STATE.extend([0 for _ in range(joystick_num_buttons)])
