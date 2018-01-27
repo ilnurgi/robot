@@ -16,7 +16,7 @@ import settings
 from helpers import get_logger
 from server.motor import Motor
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 print 'server version:', __version__
 
@@ -30,12 +30,14 @@ JOY_B6 = 6
 JOY_B7 = 7
 JOY_B8 = 8
 JOY_B9 = 9
+JOY_B10 = 10
 
-JOY_L_LR = 10
-JOY_L_UD = 11
-JOY_LRT = 12
-JOY_R_UD = 13
-JOY_R_LR = 14
+JOY_L_LR = 11
+JOY_L_UD = 12
+JOY_L_RT = 13
+JOY_R_UD = 14
+JOY_R_LR = 15
+JOY_R_RT = 16
 
 JOYS = (
     JOY_B0,
@@ -48,11 +50,13 @@ JOYS = (
     JOY_B7,
     JOY_B8,
     JOY_B9,
+    JOY_B10,
     JOY_L_LR,
     JOY_L_UD,
-    JOY_LRT,
+    JOY_L_RT,
     JOY_R_UD,
     JOY_R_LR,
+    JOY_R_RT,
 )
 JOY_COUNT_STATES = len(JOYS)
 
