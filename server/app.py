@@ -16,7 +16,7 @@ import settings
 from helpers import get_logger
 from server.motor import Motor
 
-__version__ = '0.0.3'
+__version__ = '0.0.2'
 
 print 'server version:', __version__
 
