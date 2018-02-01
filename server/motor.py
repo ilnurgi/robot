@@ -65,9 +65,9 @@ class Motor:
         self.debug('forward', value)
 
         if value > 127:
-            self.serial.write ("\xAA\x0A" + self.f1 + chr(value-128))
+            self.serial.write("\xAA\x0A" + self.f1 + chr(value-128))
         else:
-            self.serial.write ("\xAA\x0A" + self.f2 + chr(value))
+            self.serial.write("\xAA\x0A" + self.f2 + chr(value))
         self.state = MOVE
 
     def stop(self, value):

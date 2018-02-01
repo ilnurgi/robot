@@ -15,50 +15,11 @@ import settings
 
 from helpers import get_logger
 from server.motor import Motor
+from settings import JoyButtons
 
 __version__ = '0.0.3'
 
 print 'server version:', __version__
-
-JOY_B0 = 0
-JOY_B1 = 1
-JOY_B2 = 2
-JOY_B3 = 3
-JOY_B4 = 4
-JOY_B5 = 5
-JOY_B6 = 6
-JOY_B7 = 7
-JOY_B8 = 8
-JOY_B9 = 9
-JOY_B10 = 10
-
-JOY_L_LR = 11
-JOY_L_UD = 12
-JOY_L_RT = 13
-JOY_R_UD = 14
-JOY_R_LR = 15
-JOY_R_RT = 16
-
-JOYS = (
-    JOY_B0,
-    JOY_B1,
-    JOY_B2,
-    JOY_B3,
-    JOY_B4,
-    JOY_B5,
-    JOY_B6,
-    JOY_B7,
-    JOY_B8,
-    JOY_B9,
-    JOY_B10,
-    JOY_L_LR,
-    JOY_L_UD,
-    JOY_L_RT,
-    JOY_R_UD,
-    JOY_R_LR,
-    JOY_R_RT,
-)
-JOY_COUNT_STATES = len(JOYS)
 
 
 class Application(object):
@@ -92,9 +53,9 @@ class Application(object):
         обработчик событий 3х мерного джоя
         """
         self.motor_left.process_value(
-            int(values[JOY_L_UD] * 255) + int(values[JOY_L_LR] * 255))
+            int(values[JoyButtons.JOY_L_UD] * 255) + int(values[JoyButtons.JOY_L_LR] * 255))
         self.motor_right.process_value(
-            int(values[JOY_L_UD] * 255) - int(values[JOY_L_LR] * 255))
+            int(values[JoyButtons.JOY_L_UD] * 255) - int(values[JoyButtons.JOY_L_LR] * 255))
 
     def handle_buttons(self, values):
         """
@@ -121,7 +82,7 @@ class Application(object):
         except (ValueError, TypeError):
             return
 
-        if len(joy_state) == JOY_COUNT_STATES:
+        if len(joy_state) == JoyButtons.JOY_COUNT_STATES:
             self.handle_buttons(joy_state)
             self.handle_axis_motion(joy_state)
 

@@ -11,7 +11,9 @@ import pygame.joystick
 
 import settings
 
-__version__ = '0.0.4'
+from settings import JoyButtons
+
+__version__ = '0.0.5'
 
 print 'gamepad proxy:', __version__
 
@@ -44,6 +46,7 @@ def process_events(events, num_buttons):
             return False
     return True
 
+
 def run():
 
     pygame.init()
@@ -62,9 +65,9 @@ def run():
     print 'count axes:', joystick_num_axes
 
     # кнопки
-    JOY_STATE.extend([0 for _ in range(joystick_num_buttons)])
+    JOY_STATE.extend([0 for _ in range(len(JoyButtons.BUTTONS))])
     # ползунки
-    JOY_STATE.extend([0.0 for _ in range(joystick_num_axes)])
+    JOY_STATE.extend([0.0 for _ in range(len(JoyButtons.JOYS))])
 
     sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     sender.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
