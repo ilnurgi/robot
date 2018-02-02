@@ -22,8 +22,10 @@ class Application(object):
 
     def __init__(self):
         self.logger = get_logger('dashboard')
-        self.server = SocketServer.UDPServer(('localhost', settings.BROADCAST_PORT), self.handle_request)
+
+        self.server = SocketServer.UDPServer(('localhost', settings.DASHBOARD_PORT), self.handle_request)
         self.server.timeout = settings.DASHBOARD_REQUEST_TIMEOUT
+
         self.init_layout()
 
     def init_layout(self):
@@ -46,15 +48,15 @@ class Application(object):
         :return:
         """
         _request, _socket = request
-
+        print(_request)
         if ',' not in _request:
             return
 
-        values = [float(i) if '.' in i else int(i) for i in _request.split(',')]
+        # values = [float(i) if '.' in i else int(i) for i in _request.split(',')]
         # print(values)
-        left_value = int(values[JoyButtons.JOY_L_UD] * 255) + int(values[JoyButtons.JOY_L_LR] * 255)
-        right_value = int(values[JoyButtons.JOY_L_UD] * 255) - int(values[JoyButtons.JOY_L_LR] * 255)
-
+        # left_value = int(values[JoyButtons.JOY_L_UD] * 255) + int(values[JoyButtons.JOY_L_LR] * 255)
+        # right_value = int(values[JoyButtons.JOY_L_UD] * 255) - int(values[JoyButtons.JOY_L_LR] * 255)
+        left_value, right_value = [int(i) for i in _request.split(',')]
         if left_value > 255:
             left_value = 255
         elif left_value < -255:

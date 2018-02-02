@@ -3,6 +3,7 @@
 # приложение
 
 import SocketServer
+import socket
 
 import time
 
@@ -34,9 +35,13 @@ class Application(object):
         self.motor_left = Motor("\xAA\x0A\x06", self.serial_tty, 'left', "\x0B", "\x0A", "\x09", "\x08", self.logger)
         self.motor_right = Motor("\xAA\x0A\x07", self.serial_tty, 'right', "\x0F", "\x0E", "\x0D", "\x0C", self.logger)
 
-        self.remote_server = SocketServer.UDPServer(('', settings.BROADCAST_PORT), self.handle_request)
-        self.remote_server.timeout = settings.MOTOR_COMMAND_TIMEOUT
-        
+        self.server = SocketServer.UDPServer(('localhost', settings.BROADCAST_PORT), self.handle_request)
+        self.server.timeout = settings.MOTOR_COMMAND_TIMEOUT
+
+        self.sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.sender.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.sender.bind((settings.SENDER_HOST, settings.DASHBOARD_PORT))
+
         self.is_running = False
         self.last_handle_request_time = 0
 
@@ -48,14 +53,16 @@ class Application(object):
         self.motor_left.off()
         self.motor_right.off()
 
-    def handle_axis_motion(self, values):
+    def handle_axis_motion(self, values, client_address):
         """
         обработчик событий 3х мерного джоя
         """
-        self.motor_left.process_value(
-            int(values[JoyButtons.JOY_L_UD] * 255) + int(values[JoyButtons.JOY_L_LR] * 255))
-        self.motor_right.process_value(
-            int(values[JoyButtons.JOY_L_UD] * 255) - int(values[JoyButtons.JOY_L_LR] * 255))
+        left_value = int(values[JoyButtons.JOY_L_UD] * 255) + int(values[JoyButtons.JOY_L_LR] * 255)
+        right_value = int(values[JoyButtons.JOY_L_UD] * 255) - int(values[JoyButtons.JOY_L_LR] * 255)
+        self.motor_left.process_value(left_value)
+        self.motor_right.process_value(right_value)
+        print(left_value, right_value, client_address[0])
+        self.sender.sendto('{0},{1}'.format(left_value, right_value), (client_address[0], settings.DASHBOARD_PORT))
 
     def handle_buttons(self, values):
         """
@@ -84,7 +91,7 @@ class Application(object):
 
         if len(joy_state) == JoyButtons.JOY_COUNT_STATES:
             self.handle_buttons(joy_state)
-            self.handle_axis_motion(joy_state)
+            self.handle_axis_motion(joy_state, client_address)
 
     def start(self):
         """"""
@@ -100,7 +107,7 @@ class Application(object):
                 self.motors_off()
 
             # проверка пока приходит телеметрия
-            self.remote_server.handle_request()
+            self.server.handle_request()
 
         print 'Finished'
         self.motors_off()
