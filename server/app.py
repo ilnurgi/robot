@@ -18,7 +18,7 @@ from helpers import get_logger
 from server.motor import Motor
 from settings import JoyButtons
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 print 'server version:', __version__
 
@@ -35,7 +35,7 @@ class Application(object):
         self.motor_left = Motor("\xAA\x0A\x06", self.serial_tty, 'left', "\x0B", "\x0A", "\x09", "\x08", self.logger)
         self.motor_right = Motor("\xAA\x0A\x07", self.serial_tty, 'right', "\x0F", "\x0E", "\x0D", "\x0C", self.logger)
 
-        self.server = SocketServer.UDPServer(('localhost', settings.BROADCAST_PORT), self.handle_request)
+        self.server = SocketServer.UDPServer(('', settings.BROADCAST_PORT), self.handle_request)
         self.server.timeout = settings.MOTOR_COMMAND_TIMEOUT
 
         self.sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)

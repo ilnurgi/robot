@@ -15,7 +15,7 @@ if command == 'c':
 elif command == 's':
     from server.app import Application
     Application().run()
-elif command == 'в':
+elif command == 'd':
     from client.dashboard import Application
     Application().run()
 else:
