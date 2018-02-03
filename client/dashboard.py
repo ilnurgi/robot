@@ -6,15 +6,15 @@
 
 import SocketServer
 
-from Tkinter import Tk, LabelFrame, Scale
+from Tkinter import Tk, LabelFrame, Scale, Label
 
 import settings
 
 from helpers import get_logger
 from settings import JoyButtons
 
-__version__ = '0.0.2'
-print __version__
+__version__ = '0.0.3'
+print 'dashboard', __version__
 
 after_timeout = int(settings.DASHBOARD_REQUEST_TIMEOUT * 1000)
 
@@ -36,9 +36,37 @@ class Application(object):
         self.w_scale_motor1 = Scale(self.w_lf_motor, from_=-255, to=255)
         self.w_scale_motor2 = Scale(self.w_lf_motor, from_=-255, to=255)
 
-        self.w_lf_motor.place(relx=0, rely=0, relwidth=1, relheight=1)
+        self.w_lf_light = LabelFrame(self.window, text=u'Свет')
+        self.w_l_light = Label(self.w_lf_light, text=u'Выключен', fg='red', font='Arial 20')
+
+        self.w_lf_motor.place(relx=0, rely=0, relwidth=1, relheight=0.5)
         self.w_scale_motor1.place(relx=0, rely=0, relwidth=1, relheight=1)
         self.w_scale_motor2.place(relx=0.5, rely=0, relwidth=1, relheight=1)
+
+        self.w_lf_light.place(relx=0, rely=0.5, relwidth=1, relheight=0.5)
+        self.w_l_light.place(relx=0, rely=0, relwidth=1, relheight=1)
+
+    def set_motor_value(self, left_value, right_value):
+        if left_value > 255:
+            left_value = 255
+        elif left_value < -255:
+            left_value = -255
+        self.w_scale_motor1.set(left_value)
+
+        if right_value > 255:
+            right_value = 255
+        elif right_value < -255:
+            right_value = -255
+        self.w_scale_motor2.set(right_value)
+
+    def set_light(self, value):
+        """"""
+        if value == 1:
+            self.w_l_light['text'] = u'Включен'
+            self.w_l_light['fg'] = 'green'
+        else:
+            self.w_l_light['text'] = u'Выключен'
+            self.w_l_light['fg'] = 'red'
 
     def handle_request(self, request, client_address, server):
         """
@@ -53,22 +81,9 @@ class Application(object):
         if ',' not in _request:
             return
 
-        # values = [float(i) if '.' in i else int(i) for i in _request.split(',')]
-        # print(values)
-        # left_value = int(values[JoyButtons.JOY_L_UD] * 255) + int(values[JoyButtons.JOY_L_LR] * 255)
-        # right_value = int(values[JoyButtons.JOY_L_UD] * 255) - int(values[JoyButtons.JOY_L_LR] * 255)
-        left_value, right_value = [int(i) for i in _request.split(',')]
-        if left_value > 255:
-            left_value = 255
-        elif left_value < -255:
-            left_value = -255
-        self.w_scale_motor1.set(left_value)
-
-        if right_value > 255:
-            right_value = 255
-        elif right_value < -255:
-            right_value = -255
-        self.w_scale_motor2.set(right_value)
+        values = [int(i) for i in _request.split(',')]
+        self.set_motor_value(*values[:2])
+        self.set_light(values[2])
 
     def wait_request(self):
         """"""

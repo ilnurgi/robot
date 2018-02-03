@@ -5,22 +5,29 @@
 import SocketServer
 import socket
 
-import time
+from time import time
 
 try:
     import serial
 except ImportError:
     import serial_fake as serial
 
+try:
+    from pyA20.gpio import gpio
+    from pyA20.gpio import port
+except ImportError:
+    from pyA20_fake import gpio, port
+
 import settings
 
 from helpers import get_logger
+from server.light import Light
 from server.motor import Motor
 from settings import JoyButtons
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
-print 'server version:', __version__
+print 'server', __version__
 
 
 class Application(object):
@@ -34,6 +41,7 @@ class Application(object):
 
         self.motor_left = Motor("\xAA\x0A\x06", self.serial_tty, 'left', "\x0B", "\x0A", "\x09", "\x08", self.logger)
         self.motor_right = Motor("\xAA\x0A\x07", self.serial_tty, 'right', "\x0F", "\x0E", "\x0D", "\x0C", self.logger)
+        self.light = Light(getattr(gpio, settings.LIGHT_PORT))
 
         self.server = SocketServer.UDPServer(('', settings.BROADCAST_PORT), self.handle_request)
         self.server.timeout = settings.MOTOR_COMMAND_TIMEOUT
@@ -45,6 +53,9 @@ class Application(object):
         self.is_running = False
         self.last_handle_request_time = 0
 
+        self.last_light_value = 0
+        self.last_light_value_time = time()
+
     def motors_off(self):
         """
         выключаем все моторы
@@ -53,7 +64,7 @@ class Application(object):
         self.motor_left.off()
         self.motor_right.off()
 
-    def handle_axis_motion(self, values, client_address):
+    def handle_axis_motion(self, values):
         """
         обработчик событий 3х мерного джоя
         """
@@ -61,13 +72,23 @@ class Application(object):
         right_value = int(values[JoyButtons.JOY_L_UD] * 255) - int(values[JoyButtons.JOY_L_LR] * 255)
         self.motor_left.process_value(left_value)
         self.motor_right.process_value(right_value)
-        print(left_value, right_value, client_address[0])
-        self.sender.sendto('{0},{1}'.format(left_value, right_value), (client_address[0], settings.DASHBOARD_PORT))
+        return [left_value, right_value]
 
     def handle_buttons(self, values):
         """
         обработчик состояния кнопок
         """
+        light_value = values[settings.LIGHT_KEY]
+
+        if light_value == 1:
+            if self.last_light_value == light_value:
+                if time() - self.last_light_value_time > 3:
+                    self.light.toggle_state()
+            elif self.last_light_value == 0:
+                self.last_light_value_time = time()
+
+        self.last_light_value = light_value
+        return [self.light.state]
 
     def handle_request(self, request, client_address, server):
         """
@@ -77,7 +98,7 @@ class Application(object):
         :param server: сервер
         """
 
-        self.last_handle_request_time = time.time()
+        self.last_handle_request_time = time()
 
         _request, _socket = request
 
@@ -90,20 +111,25 @@ class Application(object):
             return
 
         if len(joy_state) == JoyButtons.JOY_COUNT_STATES:
-            self.handle_buttons(joy_state)
-            self.handle_axis_motion(joy_state, client_address)
+            values = self.handle_axis_motion(joy_state)
+            values.extend(self.handle_buttons(joy_state))
+            self.sender.sendto(
+                ','.join(str(i) for i in values),
+                (client_address[0], settings.DASHBOARD_PORT)
+            )
 
     def start(self):
         """"""
         self.logger.debug('start')
+        gpio.init()
         self.motors_off()
 
         self.is_running = True
-        self.last_handle_request_time = time.time()
+        self.last_handle_request_time = time()
 
         while self.is_running:
-            if (time.time() - self.last_handle_request_time) > settings.MOTOR_COMMAND_TIMEOUT:
-                self.last_handle_request_time = time.time()
+            if (time() - self.last_handle_request_time) > settings.MOTOR_COMMAND_TIMEOUT:
+                self.last_handle_request_time = time()
                 self.motors_off()
 
             # проверка пока приходит телеметрия

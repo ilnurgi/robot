@@ -29,18 +29,6 @@ MOTOR_COMMAND_TIMEOUT = 1
 DASHBOARD_REQUEST_TIMEOUT = 0.02  # чтобы интерфейс не тормозил
 DASHBOARD_PORT = 0
 
-if os.path.exists(settings_path):
-    try:
-        json_params = json.load(open(settings_path))
-    except ValueError:
-        pass
-    else:
-        globals().update(json_params)
-
-if not os.path.exists(LOGS_PATH):
-    os.makedirs(LOGS_PATH)
-
-
 class JoyButtons:
     JOY_B0 = 0
     JOY_B1 = 1
@@ -83,3 +71,22 @@ class JoyButtons:
         JOY_R_RT,
     )
     JOY_COUNT_STATES = len(JOYS) + len(BUTTONS)
+
+# фонарик
+LIGHT_PORT = 'PG0'
+LIGHT_KEY = JoyButtons.JOY_B0
+
+
+
+
+
+if os.path.exists(settings_path):
+    try:
+        json_params = json.load(open(settings_path))
+    except ValueError:
+        pass
+    else:
+        globals().update(json_params)
+
+if not os.path.exists(LOGS_PATH):
+    os.makedirs(LOGS_PATH)
