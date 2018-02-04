@@ -34,6 +34,9 @@ class Application(object):
 
     def __init__(self):
         self.logger = get_logger('server')
+
+        gpio.init()
+
         self.serial_tty = serial.Serial(
             settings.TTY_ADDRESS,
             baudrate=settings.TTY_BAUDRATE,
@@ -124,7 +127,6 @@ class Application(object):
     def start(self):
         """"""
         self.logger.debug('start')
-        gpio.init()
         self.motors_off()
 
         self.is_running = True
