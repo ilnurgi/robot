@@ -25,7 +25,7 @@ class Application(object):
     def __init__(self):
         self.logger = get_logger('dashboard')
 
-        self.server = SocketServer.UDPServer(('localhost', settings.DASHBOARD_PORT), self.handle_request)
+        self.server = SocketServer.UDPServer((settings.DASHBOARD_HOST, settings.DASHBOARD_PORT), self.handle_request)
         self.server.timeout = settings.DASHBOARD_REQUEST_TIMEOUT
 
         self.init_layout()

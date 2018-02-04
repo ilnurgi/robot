@@ -34,6 +34,7 @@ MOTOR_COMMAND_TIMEOUT = 1
 
 # настройки панели состояния
 DASHBOARD_REQUEST_TIMEOUT = 0.02  # чтобы интерфейс не тормозил
+DASHBOARD_HOST = ''
 DASHBOARD_PORT = 0
 
 
