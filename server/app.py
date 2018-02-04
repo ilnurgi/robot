@@ -41,7 +41,7 @@ class Application(object):
 
         self.motor_left = Motor("\xAA\x0A\x06", self.serial_tty, 'left', "\x0B", "\x0A", "\x09", "\x08", self.logger)
         self.motor_right = Motor("\xAA\x0A\x07", self.serial_tty, 'right', "\x0F", "\x0E", "\x0D", "\x0C", self.logger)
-        self.light = Light(getattr(gpio, settings.LIGHT_PORT))
+        self.light = Light(getattr(port, settings.LIGHT_PORT))
 
         self.server = SocketServer.UDPServer((settings.SERVER_HOST, settings.SERVER_PORT), self.handle_request)
         self.server.timeout = settings.MOTOR_COMMAND_TIMEOUT
@@ -91,11 +91,6 @@ class Application(object):
                 self.last_light_value_time = time()
 
         self.last_light_value = light_value
-        # if light_value:
-        #     if 6 > (time() - self.last_light_value_time) > 3:
-        #         self.light.toggle_state()
-        #         self.last_light_value_time = time()
-        #     else:
         return [self.light.state]
 
     def handle_request(self, request, client_address, server):
