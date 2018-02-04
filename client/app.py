@@ -2,7 +2,9 @@
 # ilnurgi
 # клиентская часть для робота, проксирует геймпад на работа
 
+import os
 import socket
+import subprocess
 import time
 
 import pygame
@@ -13,7 +15,7 @@ import settings
 
 from settings import JoyButtons
 
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 
 print 'gamepad proxy:', __version__
 
@@ -49,10 +51,13 @@ def process_events(events, num_buttons):
 
 def run():
 
+
     pygame.init()
     if not pygame.joystick.get_count():
         print 'ERROR: joystick count is 0'
         exit()
+
+    dasboard_app = subprocess.Popen('python ' + os.path.join(settings.DIR_BASE, 'client', 'dashboard.py'))
 
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
@@ -91,6 +96,7 @@ def run():
             break
         sleep(0.1)
 
+    dasboard_app.terminate()
 
 if __name__ == '__main__':
     run()
