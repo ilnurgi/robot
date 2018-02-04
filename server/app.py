@@ -25,7 +25,7 @@ from server.light import Light
 from server.motor import Motor
 from settings import JoyButtons
 
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 
 print 'server', __version__
 
@@ -82,7 +82,6 @@ class Application(object):
         обработчик состояния кнопок
         """
         light_value = values[settings.LIGHT_KEY]
-        ct = time()
 
         if light_value:
             if self.last_light_value == light_value:
@@ -90,7 +89,7 @@ class Application(object):
                 if 6 > (ct - self.last_light_value_time) > 3:
                     self.light.toggle_state()
                     self.last_light_value_time = ct
-            elif self.last_light_value_time == 0:
+            elif self.last_light_value == 0:
                 self.last_light_value_time = time()
 
         self.last_light_value = light_value

@@ -10,7 +10,7 @@ class gpio(object):
     HIGH = 1
     LOW = 0
 
-    OUTPUT = INPUT = PULLDOWN = PG0 = None
+    OUTPUT = INPUT = PULLDOWN = None
 
     @staticmethod
     def init():
@@ -31,3 +31,5 @@ class gpio(object):
 
 class port(object):
     """"""
+
+    PG0 = None

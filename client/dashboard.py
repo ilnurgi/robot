@@ -11,9 +11,8 @@ from Tkinter import Tk, LabelFrame, Scale, Label
 import settings
 
 from helpers import get_logger
-from settings import JoyButtons
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 print 'dashboard', __version__
 
@@ -78,7 +77,7 @@ class Application(object):
         :return:
         """
         _request, _socket = request
-        print _request
+
         if ',' not in _request:
             return
 
