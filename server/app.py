@@ -25,7 +25,7 @@ from server.light import Light
 from server.motor import Motor
 from settings import JoyButtons
 
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 print 'server', __version__
 
@@ -43,12 +43,12 @@ class Application(object):
         self.motor_right = Motor("\xAA\x0A\x07", self.serial_tty, 'right', "\x0F", "\x0E", "\x0D", "\x0C", self.logger)
         self.light = Light(getattr(gpio, settings.LIGHT_PORT))
 
-        self.server = SocketServer.UDPServer(('', settings.BROADCAST_PORT), self.handle_request)
+        self.server = SocketServer.UDPServer((settings.SERVER_HOST, settings.SERVER_PORT), self.handle_request)
         self.server.timeout = settings.MOTOR_COMMAND_TIMEOUT
 
         self.sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.sender.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self.sender.bind((settings.SENDER_HOST, settings.DASHBOARD_PORT))
+        self.sender.bind((settings.SOCKET_CLIENT_HOST, settings.SOCKET_CLIENT_PORT))
 
         self.is_running = False
         self.last_handle_request_time = 0
@@ -79,15 +79,23 @@ class Application(object):
         обработчик состояния кнопок
         """
         light_value = values[settings.LIGHT_KEY]
+        ct = time()
 
-        if light_value == 1:
+        if light_value:
             if self.last_light_value == light_value:
-                if time() - self.last_light_value_time > 3:
+                ct = time()
+                if 6 > (ct - self.last_light_value_time) > 3:
                     self.light.toggle_state()
-            elif self.last_light_value == 0:
+                    self.last_light_value_time = ct
+            elif self.last_light_value_time == 0:
                 self.last_light_value_time = time()
 
         self.last_light_value = light_value
+        # if light_value:
+        #     if 6 > (time() - self.last_light_value_time) > 3:
+        #         self.light.toggle_state()
+        #         self.last_light_value_time = time()
+        #     else:
         return [self.light.state]
 
     def handle_request(self, request, client_address, server):

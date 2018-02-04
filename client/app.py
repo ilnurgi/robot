@@ -13,7 +13,7 @@ import settings
 
 from settings import JoyButtons
 
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 print 'gamepad proxy:', __version__
 
@@ -71,7 +71,7 @@ def run():
 
     sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     sender.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    sender.bind((settings.SENDER_HOST, settings.SENDER_PORT))
+    sender.bind((settings.SOCKET_CLIENT_HOST, settings.SOCKET_CLIENT_PORT))
 
     # нам нужны только события джойстика
     pygame.event.set_allowed([JOYAXISMOTION, JOYBUTTONUP, JOYBUTTONDOWN, QUIT])
@@ -80,13 +80,13 @@ def run():
     sleep = time.sleep
 
     send_to = sender.sendto
-    BROADCAST_HOST = settings.BROADCAST_HOST
-    BROADCAST_PORT = settings.BROADCAST_PORT
+    host = settings.SERVER_HOST
+    port = settings.SERVER_PORT
 
     while True:
         # бесконечный сбор событий с геймпада
         if process_events(get(), joystick_num_buttons):
-            send_to(','.join(str(i) for i in JOY_STATE), (BROADCAST_HOST, BROADCAST_PORT))
+            send_to(','.join(str(i) for i in JOY_STATE), (host, port))
         else:
             break
         sleep(0.1)

@@ -13,7 +13,8 @@ import settings
 from helpers import get_logger
 from settings import JoyButtons
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
+
 print 'dashboard', __version__
 
 after_timeout = int(settings.DASHBOARD_REQUEST_TIMEOUT * 1000)
@@ -24,7 +25,7 @@ class Application(object):
     def __init__(self):
         self.logger = get_logger('dashboard')
 
-        self.server = SocketServer.UDPServer(('', settings.DASHBOARD_PORT), self.handle_request)
+        self.server = SocketServer.UDPServer(('localhost', settings.DASHBOARD_PORT), self.handle_request)
         self.server.timeout = settings.DASHBOARD_REQUEST_TIMEOUT
 
         self.init_layout()
@@ -77,7 +78,7 @@ class Application(object):
         :return:
         """
         _request, _socket = request
-
+        print _request
         if ',' not in _request:
             return
 

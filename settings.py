@@ -10,12 +10,19 @@ DIR_BASE = os.path.dirname(__file__)
 settings_path = os.path.join(DIR_BASE, 'settings.json')
 LOGS_PATH = os.path.join(DIR_BASE, 'logs')
 
-# настройки клиента
-SENDER_HOST = '0.0.0.0'
-SENDER_PORT = 0
+# ======
+# КЛИЕНТ
+# ======
 
-BROADCAST_HOST = '0.0.0.0'
-BROADCAST_PORT = 0
+SOCKET_CLIENT_HOST = '0.0.0.0'
+SOCKET_CLIENT_PORT = 0
+
+# ======
+# СЕРВЕР
+# ======
+
+SERVER_HOST = '0.0.0.0'
+SERVER_PORT = 0
 
 # настройки устройства на сервере
 TTY_ADDRESS = ''
@@ -28,6 +35,7 @@ MOTOR_COMMAND_TIMEOUT = 1
 # настройки панели состояния
 DASHBOARD_REQUEST_TIMEOUT = 0.02  # чтобы интерфейс не тормозил
 DASHBOARD_PORT = 0
+
 
 class JoyButtons:
     JOY_B0 = 0
@@ -75,10 +83,6 @@ class JoyButtons:
 # фонарик
 LIGHT_PORT = 'PG0'
 LIGHT_KEY = JoyButtons.JOY_B0
-
-
-
-
 
 if os.path.exists(settings_path):
     try:
