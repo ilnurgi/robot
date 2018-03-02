@@ -39,12 +39,18 @@ class Application(object):
         self.w_lf_light = LabelFrame(self.window, text=u'Свет')
         self.w_l_light = Label(self.w_lf_light, text=u'Выключен', fg='red', font='Arial 20')
 
-        self.w_lf_motor.place(relx=0, rely=0, relwidth=1, relheight=0.5)
+        self.w_lf_bat = LabelFrame(self.window, text=u'Батарея')
+        self.w_l_bat = Label(self.w_lf_light, text=u'0', font='Arial 20')
+
+        self.w_lf_motor.place(relx=0, rely=0, relwidth=1, relheight=0.3)
         self.w_scale_motor1.place(relx=0, rely=0, relwidth=1, relheight=1)
         self.w_scale_motor2.place(relx=0.5, rely=0, relwidth=1, relheight=1)
 
-        self.w_lf_light.place(relx=0, rely=0.5, relwidth=1, relheight=0.5)
+        self.w_lf_light.place(relx=0, rely=0.3, relwidth=1, relheight=0.3)
         self.w_l_light.place(relx=0, rely=0, relwidth=1, relheight=1)
+
+        self.w_lf_bat.place(relx=0, rely=0.6, relwidth=1, relheight=0.5)
+        self.w_l_bat.place(relx=0, rely=0, relwidth=1, relheight=1)
 
     def set_motor_value(self, left_value, right_value):
         if left_value > 255:
@@ -82,6 +88,7 @@ class Application(object):
             return
 
         values = [int(i) for i in _request.split(',')]
+
         self.set_motor_value(*values[:2])
         self.set_light(values[2])
 

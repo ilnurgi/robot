@@ -85,6 +85,13 @@ class JoyButtons:
 LIGHT_PORT = 'PG0'
 LIGHT_KEY = JoyButtons.JOY_B0
 
+# I2C
+I2C_ADDRESS = '/dev/i2c-2'
+I2C_PORT = 0x32
+I2C_READ_BYTES_COUNT = 16
+
+TELEM_UPDATE_TIME = 60
+
 if os.path.exists(settings_path):
     try:
         json_params = json.load(open(settings_path))

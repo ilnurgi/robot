@@ -21,6 +21,7 @@ except ImportError:
 import settings
 
 from helpers import get_logger
+from server.controller import Controller
 from server.light import Light
 from server.motor import Motor
 from settings import JoyButtons
@@ -45,6 +46,7 @@ class Application(object):
         self.motor_left = Motor("\xAA\x0A\x06", self.serial_tty, 'left', "\x0B", "\x0A", "\x09", "\x08", self.logger)
         self.motor_right = Motor("\xAA\x0A\x07", self.serial_tty, 'right', "\x0F", "\x0E", "\x0D", "\x0C", self.logger)
         self.light = Light(getattr(port, settings.LIGHT_PORT))
+        self.i2c_controller = Controller(settings.I2C_ADDRESS, settings.I2C_PORT)
 
         self.server = SocketServer.UDPServer((settings.SERVER_HOST, settings.SERVER_PORT), self.handle_request)
         self.server.timeout = settings.MOTOR_COMMAND_TIMEOUT
@@ -58,6 +60,9 @@ class Application(object):
 
         self.last_light_value = 0
         self.last_light_value_time = time()
+
+        # дата актуальности, данные телеметрии, температура, фото датчик
+        self.telem_values = [0, 0, 0, 0]
 
     def motors_off(self):
         """
@@ -95,6 +100,15 @@ class Application(object):
         self.last_light_value = light_value
         return [self.light.state]
 
+    def update_telem_values(self):
+        """
+        обновляем данные телеметрии
+        """
+        values = self.i2c_controller.read_values()
+
+        if values:
+            self.telem_values = values
+
     def handle_request(self, request, client_address, server):
         """
         обрабатывает запрос
@@ -116,8 +130,17 @@ class Application(object):
             return
 
         if len(joy_state) == JoyButtons.JOY_COUNT_STATES:
+
+            # обрабатываем кнопки
             values = self.handle_axis_motion(joy_state)
             values.extend(self.handle_buttons(joy_state))
+
+            if (self.last_handle_request_time - self.telem_values[0]) > settings.TELEM_UPDATE_TIME:
+                # обновляем данные телеметрии
+                self.update_telem_values()
+
+            values.extend(self.telem_values)
+
             self.sender.sendto(
                 ','.join(str(i) for i in values),
                 (client_address[0], settings.DASHBOARD_PORT)

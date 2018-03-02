@@ -57,7 +57,7 @@ def run():
         print 'ERROR: joystick count is 0'
         exit()
 
-    dasboard_app = subprocess.Popen('python ' + os.path.join(settings.DIR_BASE, 'client', 'dashboard.py'))
+    dasboard_app = subprocess.Popen('python app.py d')
 
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
@@ -70,9 +70,9 @@ def run():
     print 'count axes:', joystick_num_axes
 
     # кнопки
-    JOY_STATE.extend([0 for _ in range(len(JoyButtons.BUTTONS))])
+    JOY_STATE.extend([0 for jb in JoyButtons.BUTTONS])
     # ползунки
-    JOY_STATE.extend([0.0 for _ in range(len(JoyButtons.JOYS))])
+    JOY_STATE.extend([0.0 for ja in JoyButtons.JOYS])
 
     sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     sender.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
