@@ -172,8 +172,8 @@ class Application(object):
         self.set_motor_value(*values[:2])
         self.set_light(values[2])
         self.set_time(values[3])
-        self.set_bat(values[4])
-        self.set_temp(values[5])
+        self.set_temp(values[4])
+        self.set_bat(values[5])
         self.set_photo(values[6])
 
     def wait_request(self):
