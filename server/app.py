@@ -26,7 +26,7 @@ from server.light import Light
 from server.motor import Motor
 from settings import JoyButtons
 
-__version__ = '0.0.7'
+__version__ = '0.0.8'
 
 print 'server', __version__
 
@@ -100,6 +100,12 @@ class Application(object):
         self.last_light_value = light_value
         return [self.light.state]
 
+    def handle_controller_values(self, values):
+        """
+        обработка остальных кнопок
+        :param values:
+        """
+
     def update_telem_values(self):
         """
         обновляем данные телеметрии
@@ -134,6 +140,8 @@ class Application(object):
             # обрабатываем кнопки
             values = self.handle_axis_motion(joy_state)
             values.extend(self.handle_buttons(joy_state))
+            # обрабатываем остальные параметры
+            self.handle_controller_values(joy_state)
 
             if (self.last_handle_request_time - self.telem_values[0]) > settings.TELEM_UPDATE_TIME:
                 # обновляем данные телеметрии

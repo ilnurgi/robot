@@ -15,7 +15,7 @@ import settings
 
 from settings import JoyButtons
 
-__version__ = '0.0.7'
+__version__ = '0.0.8'
 
 print 'gamepad proxy:', __version__
 
@@ -51,7 +51,6 @@ def process_events(events, num_buttons):
 
 def run():
 
-
     pygame.init()
     if not pygame.joystick.get_count():
         print 'ERROR: joystick count is 0'
@@ -72,7 +71,7 @@ def run():
     # кнопки
     JOY_STATE.extend([0 for jb in JoyButtons.BUTTONS])
     # ползунки
-    JOY_STATE.extend([0.0 for ja in JoyButtons.JOYS])
+    JOY_STATE.extend([-1.0 if ja in (JoyButtons.JOY_L_RT, JoyButtons.JOY_R_RT) else 0.0 for ja in JoyButtons.JOYS])
 
     sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     sender.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -91,6 +90,7 @@ def run():
     while True:
         # бесконечный сбор событий с геймпада
         if process_events(get(), joystick_num_buttons):
+            print(JOY_STATE)
             send_to(','.join(str(i) for i in JOY_STATE), (host, port))
         else:
             break
