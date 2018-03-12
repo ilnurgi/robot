@@ -56,7 +56,7 @@ def run():
         print 'ERROR: joystick count is 0'
         exit()
 
-    dasboard_app = subprocess.Popen('python app.py d')
+    # dasboard_app = subprocess.Popen('python app.py d')
 
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
