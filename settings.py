@@ -53,10 +53,10 @@ class JoyButtons:
 
     JOY_L_LR = 11
     JOY_L_UD = 12
-    JOY_L_RT = 13
+    JOY_LT = 13
     JOY_R_UD = 14
     JOY_R_LR = 15
-    JOY_R_RT = 16
+    JOY_RT = 16
 
     BUTTONS = (
         JOY_B0,
@@ -74,10 +74,10 @@ class JoyButtons:
     JOYS = (
         JOY_L_LR,
         JOY_L_UD,
-        JOY_L_RT,
+        JOY_LT,
         JOY_R_UD,
         JOY_R_LR,
-        JOY_R_RT,
+        JOY_RT,
     )
     JOY_COUNT_STATES = len(JOYS) + len(BUTTONS)
 

@@ -97,6 +97,13 @@ class Application(object):
             elif self.last_light_value == 0:
                 self.last_light_value_time = time()
 
+        try:
+            lt_value = (65536 * (values[JoyButtons.JOY_LT] + 1))/2
+        except ZeroDivisionError:
+            lt_value = 0
+
+        self.i2c_controller.write_values(lt_value)
+
         self.last_light_value = light_value
         return [self.light.state]
 

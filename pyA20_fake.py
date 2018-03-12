@@ -65,5 +65,5 @@ class i2c(object):
         return values
 
     @staticmethod
-    def write():
+    def write(values):
         """"""

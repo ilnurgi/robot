@@ -71,7 +71,7 @@ def run():
     # кнопки
     JOY_STATE.extend([0 for jb in JoyButtons.BUTTONS])
     # ползунки
-    JOY_STATE.extend([-1.0 if ja in (JoyButtons.JOY_L_RT, JoyButtons.JOY_R_RT) else 0.0 for ja in JoyButtons.JOYS])
+    JOY_STATE.extend([-1.0 if ja in (JoyButtons.JOY_LT, JoyButtons.JOY_RT) else 0.0 for ja in JoyButtons.JOYS])
 
     sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     sender.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -96,7 +96,7 @@ def run():
             break
         sleep(0.1)
 
-    dasboard_app.terminate()
+    # dasboard_app.terminate()
 
 if __name__ == '__main__':
     run()

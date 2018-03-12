@@ -38,3 +38,20 @@ class Controller(object):
             # фото
             values[6] * 256 + values[7]
         ]
+
+    def write_values(self, *values):
+        """
+        записывает данные в контроллер
+        :param values:
+        """
+        val_11, val_12 = divmod(values[0], 256)
+
+        i2c.write([
+            ord('a'),
+            ord('t'),
+            val_11,
+            val_12,
+
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+        ])
