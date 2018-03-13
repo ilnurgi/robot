@@ -39,17 +39,17 @@ DASHBOARD_PORT = 0
 
 
 class JoyButtons:
-    JOY_B0 = 0
-    JOY_B1 = 1
-    JOY_B2 = 2
-    JOY_B3 = 3
-    JOY_B4 = 4
-    JOY_B5 = 5
+    JOY_B_A = 0
+    JOY_B_B = 1
+    JOY_B_X = 2
+    JOY_B_Y = 3
+    JOY_LB = 4
+    JOY_RB = 5
     JOY_B6 = 6
     JOY_B7 = 7
     JOY_B8 = 8
-    JOY_B9 = 9
-    JOY_B10 = 10
+    JOY_B_AXIS_L = 9
+    JOY_B_AXIS_R = 10
 
     JOY_L_LR = 11
     JOY_L_UD = 12
@@ -59,17 +59,17 @@ class JoyButtons:
     JOY_RT = 16
 
     BUTTONS = (
-        JOY_B0,
-        JOY_B1,
-        JOY_B2,
-        JOY_B3,
-        JOY_B4,
-        JOY_B5,
+        JOY_B_A,
+        JOY_B_B,
+        JOY_B_X,
+        JOY_B_Y,
+        JOY_LB,
+        JOY_RB,
         JOY_B6,
         JOY_B7,
         JOY_B8,
-        JOY_B9,
-        JOY_B10,
+        JOY_B_AXIS_L,
+        JOY_B_AXIS_R,
     )
     JOYS = (
         JOY_L_LR,
@@ -81,16 +81,17 @@ class JoyButtons:
     )
     JOY_COUNT_STATES = len(JOYS) + len(BUTTONS)
 
+
 # фонарик
 LIGHT_PORT = 'PG0'
-LIGHT_KEY = JoyButtons.JOY_B0
+LIGHT_KEY = JoyButtons.JOY_B_A
 
 # I2C
 I2C_ADDRESS = '/dev/i2c-2'
 I2C_PORT = 0x32
 I2C_READ_BYTES_COUNT = 16
 
-TELEM_UPDATE_TIME = 60
+TELEM_UPDATE_TIME = 3
 
 if os.path.exists(settings_path):
     try:

@@ -59,7 +59,7 @@ class Application(object):
         Label(self.w_lf_telem, text=u'Время:', font='Arial 15').place(relx=0, rely=0, relwidth=0.5, relheight=0.25)
         Label(self.w_lf_telem, text=u'Батарея:', font='Arial 15').place(relx=0, rely=0.25, relwidth=0.5, relheight=0.25)
         Label(self.w_lf_telem, text=u'Температура:', font='Arial 15').place(relx=0, rely=0.5, relwidth=0.5, relheight=0.25)
-        Label(self.w_lf_telem, text=u'Свет:', font='Arial 15').place(relx=0, rely=0.75, relwidth=0.5, relheight=0.25)
+        Label(self.w_lf_telem, text=u'Освещенность:', font='Arial 15').place(relx=0, rely=0.75, relwidth=0.5, relheight=0.25)
         self.w_l_telem_time.place(relx=0.5, rely=0, relwidth=0.5, relheight=0.25)
         self.w_l_telem_bat.place(relx=0.5, rely=0.25, relwidth=0.5, relheight=0.25)
         self.w_l_telem_temp.place(relx=0.5, rely=0.5, relwidth=0.5, relheight=0.25)
@@ -132,16 +132,9 @@ class Application(object):
             return
         self.raw_telem_temp = value
 
-        offset = -0.01
-        t_sensor = ((value * (1.1 / 1024.0)) - 0.5 + offset) * 100
-        error = 244e-6 * (125 - t_sensor) * (t_sensor - -40.0) + 2E-12 * (t_sensor - -40.0) - 2.0
-        temp = t_sensor - error
-
-        temp2 = (value*5/1024.0 - 0.5)/0.01
-        if 20 >= temp2 <= 25:
-            temp2 = value*3.3/1024.0
-
-        self.w_l_telem_temp['text'] = '{0}/{1} ({2})'.format(round(temp, 3), round(temp2, 3), value)
+        self.w_l_telem_temp['text'] = '{0} ({1})'.format(
+            round((value * 3.3/1024 - 0.5) / 0.01, 3),
+            value)
 
     def set_photo(self, value):
         """

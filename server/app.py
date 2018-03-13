@@ -82,6 +82,22 @@ class Application(object):
         self.motor_right.process_value(right_value)
         return [left_value, right_value]
 
+    def _get_value(self, value):
+        """
+        преобразуем значение -1...+1 в значение от 0...65535
+        """
+        if value < -1:
+            value = -1
+        elif value > 1:
+            value = 1
+
+        try:
+            value = int((65535 * (value + 1))/2)
+        except ZeroDivisionError:
+            value = 0
+
+        return value
+
     def handle_buttons(self, values):
         """
         обработчик состояния кнопок
@@ -97,12 +113,16 @@ class Application(object):
             elif self.last_light_value == 0:
                 self.last_light_value_time = time()
 
-        try:
-            lt_value = (65536 * (values[JoyButtons.JOY_LT] + 1))/2
-        except ZeroDivisionError:
-            lt_value = 0
-
-        self.i2c_controller.write_values(lt_value)
+        self.i2c_controller.write_values(
+            self._get_value(values[JoyButtons.JOY_LT]),
+            self._get_value(values[JoyButtons.JOY_RT]),
+            self._get_value(values[JoyButtons.JOY_L_LR]),
+            self._get_value(values[JoyButtons.JOY_L_UD]),
+            255 if values[JoyButtons.JOY_LB] > 0 else 0,
+            255 if values[JoyButtons.JOY_RB] > 0 else 0,
+            255 if values[JoyButtons.JOY_B_AXIS_L] > 0 else 0,
+            255 if values[JoyButtons.JOY_B_AXIS_R] > 0 else 0,
+        )
 
         self.last_light_value = light_value
         return [self.light.state]

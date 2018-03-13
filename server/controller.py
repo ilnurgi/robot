@@ -39,19 +39,25 @@ class Controller(object):
             values[6] * 256 + values[7]
         ]
 
-    def write_values(self, *values):
+    def write_values(self, lt_value, rt_value, r_x, r_y, lb, rb, axis_b_l, axis_b_r):
         """
         записывает данные в контроллер
         :param values:
         """
-        val_11, val_12 = divmod(values[0], 256)
+        val_11, val_12 = divmod(lt_value, 256)
+        val_21, val_22 = divmod(rt_value, 256)
+        val_31, val_32 = divmod(r_x, 256)
+        val_41, val_42 = divmod(r_y, 256)
+        _values = [
+            ord('a'), ord('t'),
+            val_11, val_12,
+            val_21, val_22,
+            val_31, val_32,
+            val_41, val_42,
+            lb, rb,
+            axis_b_l, axis_b_r,
 
-        i2c.write([
-            ord('a'),
-            ord('t'),
-            val_11,
-            val_12,
+            0, 0,
 
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-
-        ])
+        ]
+        i2c.write(_values)

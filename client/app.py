@@ -90,13 +90,14 @@ def run():
     while True:
         # бесконечный сбор событий с геймпада
         if process_events(get(), joystick_num_buttons):
-            print(JOY_STATE)
+            # print(JOY_STATE)
             send_to(','.join(str(i) for i in JOY_STATE), (host, port))
         else:
             break
         sleep(0.1)
 
     # dasboard_app.terminate()
+
 
 if __name__ == '__main__':
     run()
