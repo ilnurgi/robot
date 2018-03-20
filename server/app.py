@@ -24,6 +24,7 @@ from helpers import get_logger
 from server.controller import Controller
 from server.light import Light
 from server.motor import Motor
+from server.video import Video
 from settings import JoyButtons
 
 __version__ = '0.0.8'
@@ -46,6 +47,7 @@ class Application(object):
         self.motor_left = Motor("\xAA\x0A\x06", self.serial_tty, 'left', "\x0B", "\x0A", "\x09", "\x08", self.logger)
         self.motor_right = Motor("\xAA\x0A\x07", self.serial_tty, 'right', "\x0F", "\x0E", "\x0D", "\x0C", self.logger)
         self.light = Light(getattr(port, settings.LIGHT_PORT))
+        self.video = Video()
         self.i2c_controller = Controller(settings.I2C_ADDRESS, settings.I2C_PORT)
 
         self.server = SocketServer.UDPServer((settings.SERVER_HOST, settings.SERVER_PORT), self.handle_request)
@@ -60,6 +62,9 @@ class Application(object):
 
         self.last_light_value = 0
         self.last_light_value_time = time()
+
+        self.last_video_value = 0
+        self.last_video_value_time = time()
 
         # дата актуальности, данные телеметрии, температура, фото датчик
         self.telem_values = [0, 0, 0, 0]
@@ -98,21 +103,45 @@ class Application(object):
 
         return value
 
-    def handle_buttons(self, values):
+    def __process_light_value(self, value):
         """
-        обработчик состояния кнопок
+        обработка включения/выключения фар
         """
-        light_value = values[settings.LIGHT_KEY]
-
-        if light_value:
-            if self.last_light_value == light_value:
+        if value:
+            if self.last_light_value == value:
                 ct = time()
                 if 6 > (ct - self.last_light_value_time) > 3:
                     self.light.toggle_state()
                     self.last_light_value_time = ct
             elif self.last_light_value == 0:
                 self.last_light_value_time = time()
+        self.last_light_value = value
 
+    def __process_video_value(self, value):
+        """
+        обработка включения/выключения видео
+        """
+        if value:
+            if self.last_video_value == value:
+                ct = time()
+                if 6 > (ct - self.last_video_value_time) > 3:
+                    self.video.toggle_state()
+                    self.last_video_value_time = ct
+            elif self.last_video_value == 0:
+                self.last_video_value_time = time()
+        self.last_video_value = value
+
+    def handle_buttons(self, values):
+        """
+        обработчик состояния кнопок
+        """
+
+        # обработаем включение/выключение фонарика
+        self.__process_light_value(values[settings.LIGHT_KEY])
+        # обработаем включение/выключение видео
+        self.__process_video_value(values[settings.VIDEO_KEY])
+
+        # отправим контроллеру значения для команд
         self.i2c_controller.write_values(
             self._get_value(values[JoyButtons.JOY_LT]),
             self._get_value(values[JoyButtons.JOY_RT]),
@@ -123,9 +152,7 @@ class Application(object):
             255 if values[JoyButtons.JOY_B_AXIS_L] > 0 else 0,
             255 if values[JoyButtons.JOY_B_AXIS_R] > 0 else 0,
         )
-
-        self.last_light_value = light_value
-        return [self.light.state]
+        return [self.light.state, self.video.state]
 
     def handle_controller_values(self, values):
         """

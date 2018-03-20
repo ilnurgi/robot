@@ -86,12 +86,21 @@ class JoyButtons:
 LIGHT_PORT = 'PG0'
 LIGHT_KEY = JoyButtons.JOY_B_A
 
+# включение видео
+VIDEO_KEY = JoyButtons.JOY_B_B
+
 # I2C
 I2C_ADDRESS = '/dev/i2c-2'
 I2C_PORT = 0x32
 I2C_READ_BYTES_COUNT = 16
 
 TELEM_UPDATE_TIME = 3
+
+VIDEO_STREAM_CMD = (
+    'cvlc v4l2:///dev/video0:chroma=h264:width=800:height=48live-caching=50 '
+    ':sout=#udp{dst=192.168.1.26:1234} :sout-keep')
+
+VIDEO_SHOW_CMD = 'mplayer  udp://:1234'
 
 if os.path.exists(settings_path):
     try:

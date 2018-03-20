@@ -5,12 +5,10 @@
 """
 
 import SocketServer
-import platform
+import subprocess
 
 from datetime import datetime
-from Tkinter import Tk, LabelFrame, Scale, Label, Frame
-
-import vlc
+from Tkinter import Tk, LabelFrame, Scale, Label, Frame, Button
 
 import settings
 
@@ -31,70 +29,65 @@ class Application(object):
         self.server = SocketServer.UDPServer((settings.DASHBOARD_HOST, settings.DASHBOARD_PORT), self.handle_request)
         self.server.timeout = settings.DASHBOARD_REQUEST_TIMEOUT
 
-        self.init_layout()
-
-    def init_layout(self):
-        self.window = Tk()
-        self.window.wm_minsize(800, 400)
-
-        self.w_left_frame = Frame(self.window)
-        self.w_left_frame.place(relx=0, rely=0, relheight=1, relwidth=0.5)
-
-        self.w_right_frame = Frame(self.window)
-        self.w_right_frame.place(relx=0.5, rely=0, relheight=1, relwidth=0.5)
-
-        self.w_lf_motor = LabelFrame(self.w_left_frame, text=u'Моторы')
-        self.w_scale_motor1 = Scale(self.w_lf_motor, from_=-255, to=255)
-        self.w_scale_motor2 = Scale(self.w_lf_motor, from_=-255, to=255)
-
-        self.w_lf_light = LabelFrame(self.w_left_frame, text=u'Свет')
-        self.w_l_light = Label(self.w_lf_light, text=u'Выключен', fg='red', font='Arial 20')
-
-        self.w_lf_telem = LabelFrame(self.w_left_frame, text=u'Телеметрия')
-        self.w_l_telem_time = Label(self.w_lf_telem, text=u'0', font='Arial 15')
-        self.w_l_telem_bat = Label(self.w_lf_telem, text=u'0', font='Arial 15')
-        self.w_l_telem_temp = Label(self.w_lf_telem, text=u'0', font='Arial 15')
-        self.w_l_telem_photo = Label(self.w_lf_telem, text=u'0', font='Arial 15')
-
-        self.w_lf_motor.place(relx=0, rely=0, relwidth=1, relheight=0.3)
-        self.w_scale_motor1.place(relx=0, rely=0, relwidth=1, relheight=1)
-        self.w_scale_motor2.place(relx=0.5, rely=0, relwidth=1, relheight=1)
-
-        self.w_lf_light.place(relx=0, rely=0.3, relwidth=1, relheight=0.3)
-        self.w_l_light.place(relx=0, rely=0, relwidth=1, relheight=1)
-
-        self.w_lf_telem.place(relx=0, rely=0.6, relwidth=1, relheight=0.4)
-        Label(self.w_lf_telem, text=u'Время:', font='Arial 15').place(relx=0, rely=0, relwidth=0.5, relheight=0.25)
-        Label(self.w_lf_telem, text=u'Батарея:', font='Arial 15').place(relx=0, rely=0.25, relwidth=0.5, relheight=0.25)
-        Label(self.w_lf_telem, text=u'Температура:', font='Arial 15').place(relx=0, rely=0.5, relwidth=0.5, relheight=0.25)
-        Label(self.w_lf_telem, text=u'Освещенность:', font='Arial 15').place(relx=0, rely=0.75, relwidth=0.5, relheight=0.25)
-        self.w_l_telem_time.place(relx=0.5, rely=0, relwidth=0.5, relheight=0.25)
-        self.w_l_telem_bat.place(relx=0.5, rely=0.25, relwidth=0.5, relheight=0.25)
-        self.w_l_telem_temp.place(relx=0.5, rely=0.5, relwidth=0.5, relheight=0.25)
-        self.w_l_telem_photo.place(relx=0.5, rely=0.75, relwidth=0.5, relheight=0.25)
-
         self.raw_telem_time = 0
         self.raw_telem_bat = 0
         self.raw_telem_temp = 0
         self.raw_telem_photo = 0
 
-        # self.__init_media_player()
+        self.__init_main()
+        self.__init_motor()
+        self.__init_light()
+        self.__init_video()
+        self.__init_telem()
 
-    def __init_media_player(self):
-        self.platform = platform.system().lower()
-        self.media_label = Label(self.w_right_frame)
-        self.media_label.place(relx=0, rely=0, relheight=1, relwidth=1)
+    def __init_main(self):
+        self.window = Tk()
+        self.window.wm_minsize(400, 400)
 
-        self.vlc_instance = vlc.Instance()
-        self.vlc_player = self.vlc_instance.media_player_new()
-        self.vlc_media = self.vlc_instance.media_new('D:\\photos\\VID-20170915-WA0000.mp4')
-        self.vlc_media.add_option('network-caching=0')
-        self.vlc_player.set_media(self.vlc_media)
-        if self.platform == 'windows':
-            self.vlc_player.set_hwnd(self.media_label.winfo_id())
-        else:
-            self.vlc_player.set_xwindow(self.media_label.winfo_id())
-        self.vlc_player.play()
+    def __init_motor(self):
+        self.w_lf_motor = LabelFrame(self.window, text=u'Моторы')
+        self.w_scale_motor1 = Scale(self.w_lf_motor, from_=-255, to=255)
+        self.w_scale_motor2 = Scale(self.w_lf_motor, from_=-255, to=255)
+
+        self.w_lf_motor.place(relx=0, rely=0, relwidth=1, relheight=0.3)
+        self.w_scale_motor1.place(relx=0, rely=0, relwidth=1, relheight=1)
+        self.w_scale_motor2.place(relx=0.5, rely=0, relwidth=1, relheight=1)
+
+    def __init_light(self):
+        self.w_lf_light = LabelFrame(self.window, text=u'Свет')
+        self.w_l_light = Label(self.w_lf_light, text=u'Выключен', fg='red', font='Arial 20')
+
+        self.w_lf_light.place(relx=0, rely=0.3, relwidth=1, relheight=0.15)
+        self.w_l_light.place(relx=0, rely=0, relwidth=1, relheight=1)
+
+    def __init_video(self):
+        self.w_lf_video = LabelFrame(self.window, text=u'Видео')
+        self.w_l_video = Label(self.w_lf_video, text=u'Выключен', fg='red', font='Arial 20')
+        self.w_b_show = Button(self.w_lf_video, text=u'mplayer', command=self.start_mplayer)
+
+        self.w_lf_video.place(relx=0, rely=0.45, relwidth=1, relheight=0.15)
+        self.w_l_video.place(relx=0, rely=0, relwidth=0.7, relheight=1)
+        self.w_b_show.place(relx=0.7, rely=0, relwidth=0.3, relheight=1)
+
+    def __init_telem(self):
+        # телеметрия
+        self.w_lf_telem = LabelFrame(self.window, text=u'Телеметрия')
+        self.w_l_telem_time = Label(self.w_lf_telem, text=u'0', font='Arial 15')
+        self.w_l_telem_bat = Label(self.w_lf_telem, text=u'0', font='Arial 15')
+        self.w_l_telem_temp = Label(self.w_lf_telem, text=u'0', font='Arial 15')
+        self.w_l_telem_photo = Label(self.w_lf_telem, text=u'0', font='Arial 15')
+
+        self.w_lf_telem.place(relx=0, rely=0.6, relwidth=1, relheight=0.4)
+
+        Label(self.w_lf_telem, text=u'Время:', font='Arial 15').place(relx=0, rely=0, relwidth=0.5, relheight=0.25)
+        Label(self.w_lf_telem, text=u'Батарея:', font='Arial 15').place(relx=0, rely=0.25, relwidth=0.5, relheight=0.25)
+        Label(self.w_lf_telem, text=u'Температура:', font='Arial 15').place(relx=0, rely=0.5, relwidth=0.5, relheight=0.25)
+        Label(self.w_lf_telem, text=u'Освещенность:', font='Arial 15').place(relx=0, rely=0.75, relwidth=0.5, relheight=0.25)
+
+        self.w_l_telem_time.place(relx=0.5, rely=0, relwidth=0.5, relheight=0.25)
+        self.w_l_telem_bat.place(relx=0.5, rely=0.25, relwidth=0.5, relheight=0.25)
+        self.w_l_telem_temp.place(relx=0.5, rely=0.5, relwidth=0.5, relheight=0.25)
+        self.w_l_telem_photo.place(relx=0.5, rely=0.75, relwidth=0.5, relheight=0.25)
 
     def set_motor_value(self, left_value, right_value):
         if left_value > 255:
@@ -120,6 +113,18 @@ class Application(object):
         else:
             self.w_l_light['text'] = u'Выключен'
             self.w_l_light['fg'] = 'red'
+
+    def set_video(self, value):
+        """
+        устанавливает значение для фонарика
+        :param value:
+        """
+        if value == 1:
+            self.w_l_video['text'] = u'Включен'
+            self.w_l_video['fg'] = 'green'
+        else:
+            self.w_l_video['text'] = u'Выключен'
+            self.w_l_video['fg'] = 'red'
 
     def set_time(self, value):
         """
@@ -173,6 +178,12 @@ class Application(object):
 
         self.w_l_telem_photo['text'] = value
 
+    def start_mplayer(self):
+        """
+        включает mplayer
+        """
+        process = subprocess.Popen(settings.VIDEO_SHOW_CMD, shell=True)
+
     def handle_request(self, request, client_address, server):
         """
         обработка входных данных
@@ -190,10 +201,11 @@ class Application(object):
 
         self.set_motor_value(*values[:2])
         self.set_light(values[2])
-        self.set_time(values[3])
-        self.set_temp(values[4])
-        self.set_bat(values[5])
-        self.set_photo(values[6])
+        self.set_video(values[3])
+        self.set_time(values[4])
+        self.set_temp(values[5])
+        self.set_bat(values[6])
+        self.set_photo(values[7])
 
     def wait_request(self):
         """"""
