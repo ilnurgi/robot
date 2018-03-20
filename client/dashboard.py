@@ -5,10 +5,12 @@
 """
 
 import SocketServer
+import platform
 
 from datetime import datetime
+from Tkinter import Tk, LabelFrame, Scale, Label, Frame
 
-from Tkinter import Tk, LabelFrame, Scale, Label
+import vlc
 
 import settings
 
@@ -33,16 +35,22 @@ class Application(object):
 
     def init_layout(self):
         self.window = Tk()
-        self.window.wm_minsize(400, 400)
+        self.window.wm_minsize(800, 400)
 
-        self.w_lf_motor = LabelFrame(self.window, text=u'Моторы')
+        self.w_left_frame = Frame(self.window)
+        self.w_left_frame.place(relx=0, rely=0, relheight=1, relwidth=0.5)
+
+        self.w_right_frame = Frame(self.window)
+        self.w_right_frame.place(relx=0.5, rely=0, relheight=1, relwidth=0.5)
+
+        self.w_lf_motor = LabelFrame(self.w_left_frame, text=u'Моторы')
         self.w_scale_motor1 = Scale(self.w_lf_motor, from_=-255, to=255)
         self.w_scale_motor2 = Scale(self.w_lf_motor, from_=-255, to=255)
 
-        self.w_lf_light = LabelFrame(self.window, text=u'Свет')
+        self.w_lf_light = LabelFrame(self.w_left_frame, text=u'Свет')
         self.w_l_light = Label(self.w_lf_light, text=u'Выключен', fg='red', font='Arial 20')
 
-        self.w_lf_telem = LabelFrame(self.window, text=u'Телеметрия')
+        self.w_lf_telem = LabelFrame(self.w_left_frame, text=u'Телеметрия')
         self.w_l_telem_time = Label(self.w_lf_telem, text=u'0', font='Arial 15')
         self.w_l_telem_bat = Label(self.w_lf_telem, text=u'0', font='Arial 15')
         self.w_l_telem_temp = Label(self.w_lf_telem, text=u'0', font='Arial 15')
@@ -69,6 +77,24 @@ class Application(object):
         self.raw_telem_bat = 0
         self.raw_telem_temp = 0
         self.raw_telem_photo = 0
+
+        # self.__init_media_player()
+
+    def __init_media_player(self):
+        self.platform = platform.system().lower()
+        self.media_label = Label(self.w_right_frame)
+        self.media_label.place(relx=0, rely=0, relheight=1, relwidth=1)
+
+        self.vlc_instance = vlc.Instance()
+        self.vlc_player = self.vlc_instance.media_player_new()
+        self.vlc_media = self.vlc_instance.media_new('D:\\photos\\VID-20170915-WA0000.mp4')
+        self.vlc_media.add_option('network-caching=0')
+        self.vlc_player.set_media(self.vlc_media)
+        if self.platform == 'windows':
+            self.vlc_player.set_hwnd(self.media_label.winfo_id())
+        else:
+            self.vlc_player.set_xwindow(self.media_label.winfo_id())
+        self.vlc_player.play()
 
     def set_motor_value(self, left_value, right_value):
         if left_value > 255:
