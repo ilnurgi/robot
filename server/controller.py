@@ -24,10 +24,11 @@ class Controller(object):
         self.state = None
 
     def set_state(self, state):
-        if state == self.state:
+        if self.state == state:
             return
 
         self.state = state
+
         if self.state == ON:
             print 'Controller available'
         else:
@@ -37,6 +38,9 @@ class Controller(object):
         """
         читаем данные с контроллера
         """
+        if self.state == OFF:
+            return
+
         try:
             values = i2c.read(settings.I2C_READ_BYTES_COUNT)
         except IOError:
@@ -46,7 +50,7 @@ class Controller(object):
             self.set_state(ON)
 
         if values[:2] != [97, 116]:
-            return None
+            return
 
         return [
             # время актуальности
@@ -84,6 +88,5 @@ class Controller(object):
             i2c.write(_values)
         except IOError:
             self.set_state(OFF)
-            return
         else:
             self.set_state(ON)
