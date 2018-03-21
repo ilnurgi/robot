@@ -12,18 +12,38 @@ except ImportError:
 
 import settings
 
+ON = 1
+OFF = 0
+
 
 class Controller(object):
 
     def __init__(self, device_address, port):
         i2c.init(device_address)
         i2c.open(port)
+        self.state = None
+
+    def set_state(self, state):
+        if state == self.state:
+            return
+
+        self.state = state
+        if self.state == ON:
+            print 'Controller available'
+        else:
+            print 'Controller unavailable'
 
     def read_values(self):
         """
         читаем данные с контроллера
         """
-        values = i2c.read(settings.I2C_READ_BYTES_COUNT)
+        try:
+            values = i2c.read(settings.I2C_READ_BYTES_COUNT)
+        except IOError:
+            self.set_state(OFF)
+            return
+        else:
+            self.set_state(ON)
 
         if values[:2] != [97, 116]:
             return None
@@ -60,4 +80,10 @@ class Controller(object):
             0, 0,
 
         ]
-        i2c.write(_values)
+        try:
+            i2c.write(_values)
+        except IOError:
+            self.set_state(OFF)
+            return
+        else:
+            self.set_state(ON)
