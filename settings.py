@@ -101,6 +101,8 @@ VIDEO_STREAM_CMD = (
     ':sout=#udp{dst=192.168.1.26:1234} :sout-keep')
 
 VIDEO_SHOW_CMD = 'mplayer  udp://:1234'
+USER_UID = 1000
+USER_GID = 1000
 
 if os.path.exists(settings_path):
     try:
