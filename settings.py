@@ -97,7 +97,7 @@ I2C_READ_BYTES_COUNT = 16
 TELEM_UPDATE_TIME = 3
 
 VIDEO_STREAM_CMD = (
-    'cvlc v4l2:///dev/video0:chroma=h264:width=800:height=48live-caching=50 '
+    'cvlc v4l2:///dev/video0:chroma=h264:width=800:height=480:live-caching=50 '
     ':sout=#udp{dst=192.168.1.26:1234} :sout-keep')
 
 VIDEO_SHOW_CMD = 'mplayer  udp://:1234'
