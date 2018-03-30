@@ -25,7 +25,7 @@ SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 0
 
 # настройки устройства на сервере
-TTY_ADDRESS = ''
+TTY_ADDRESS = '/dev/ttyACM0'
 TTY_BAUDRATE = 9600
 TTY_TIMEOUT = 0.3
 
